@@ -14,7 +14,7 @@ func RootCmd() *cobra.Command {
 
 	rootCmd := &cobra.Command{
 		Use:   "reaper",
-		Short: "Convert Sauce 3 modules to Sauce 5 modules.",
+		Short: "Generate a dataset for a given topic",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(searchTerms) == 0 {
 				fmt.Println("Reaper needs a search term in order to work")
