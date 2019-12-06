@@ -30,9 +30,9 @@ Flags:
 ## Example
 
 ```sh
-reaper -t "cats" -t "dogs" -o "./animals"
+reaper -t "snoop dogg" -o "./snoop"
 
-# After this completes you should have around ~2k images in your local animals/ folder
+# After this completes you should have around ~2k images in your local snoop/ folder
 ```
 
 ## Author
