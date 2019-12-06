@@ -10,7 +10,7 @@
 ## Install
 
 ```sh
-go get https://github.com/sno6/reaper
+go get github.com/sno6/reaper
 ```
 
 ## Usage
