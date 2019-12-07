@@ -49,8 +49,8 @@ func RootCmd() *cobra.Command {
 	rootCmd.Flags().StringVarP(&outDir, "out", "o", "./", "Output directory")
 	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Log errors")
 	rootCmd.Flags().DurationVarP(&timeout, "timeout", "t", defTimeout, "HTTP request timeout in seconds")
-	rootCmd.Flags().IntVar(&width, "mw", -1, "Only allow images width a width >= to this value")
-	rootCmd.Flags().IntVar(&height, "mh", -1, "Only allow images width a height >= to this value")
+	rootCmd.Flags().IntVar(&width, "mw", -1, "Only allow images with a width >= to this value")
+	rootCmd.Flags().IntVar(&height, "mh", -1, "Only allow images with a height >= to this value")
 
 	return rootCmd
 }

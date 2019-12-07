@@ -21,8 +21,8 @@ Usage:
 
 Flags:
   -h, --help                 help for reaper
-      --mh int               Only allow images width a height >= to this value (default -1)
-      --mw int               Only allow images width a width >= to this value (default -1)
+      --mh int               Only allow images with a height >= to this value (default -1)
+      --mw int               Only allow images with a width >= to this value (default -1)
   -o, --out string           Output directory (default "./")
   -s, --search stringArray   Search terms
   -t, --timeout duration     HTTP request timeout in seconds (default 15s)
