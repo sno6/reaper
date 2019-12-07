@@ -36,11 +36,11 @@ const (
 	step      = 50
 )
 
-func GetImages(c *http.Client, searchTerm string) ([]*search.Result, error) {
+func GetImages(searchTerm string) ([]*search.Result, error) {
 	var results []*search.Result
 	searchTerm = url.QueryEscape(searchTerm)
 
-	token, err := getToken(c, searchTerm)
+	token, err := getToken(searchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func getImages(searchTerm string, token string, step int) ([]*search.Result, str
 	return convertResponse(res), res.Next, nil
 }
 
-func getToken(c *http.Client, searchTerm string) (string, error) {
+func getToken(searchTerm string) (string, error) {
 	r, err := http.NewRequest(http.MethodGet, baseURL, nil)
 	if err != nil {
 		return "", nil
@@ -97,7 +97,7 @@ func getToken(c *http.Client, searchTerm string) (string, error) {
 	q.Add("q", searchTerm)
 	r.URL.RawQuery = q.Encode()
 
-	rsp, err := c.Do(r)
+	rsp, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return "", nil
 	}

@@ -16,24 +16,30 @@ go get github.com/sno6/reaper
 ## Usage
 
 ```sh
-Generate a dataset for a given topic
-
 Usage:
   reaper [flags]
 
 Flags:
-  -h, --help               help for reaper
-  -o, --out string         Output directory (default "./")
-  -t, --term stringArray   Search terms
+  -h, --help                 help for reaper
+      --mh int               Only allow images width a height >= to this value (default -1)
+      --mw int               Only allow images width a width >= to this value (default -1)
+  -o, --out string           Output directory (default "./")
+  -s, --search stringArray   Search terms
+  -t, --timeout duration     HTTP request timeout in seconds (default 15s)
+  -v, --verbose              Log errors
 ```
 
 ## Example
 
 ```sh
-reaper -t "snoop dogg" -o "./snoop"
+reaper -s "snoop dogg" -o "./snoop"
 
 # After this completes you should have around ~2k images in your local snoop/ folder
 ```
+
+## Search Engines
+
+Currently `reaper` only supports the Duck Duck Go search engine however more will be added in the near future.
 
 ## Author
 

@@ -1,27 +1,16 @@
 package duck
 
 import (
-	"net/http"
-
 	"github.com/pkg/errors"
 	"github.com/sno6/reaper/internal/search"
 )
 
-type Duck struct {
-	c *http.Client
-}
-
-func New(c *http.Client) *Duck {
-	if c == nil {
-		c = &http.Client{}
-	}
-	return &Duck{c: c}
-}
+type Duck struct{}
 
 func (d *Duck) Images(terms []string) ([]*search.Result, error) {
 	var results []*search.Result
 	for _, term := range terms {
-		res, err := GetImages(d.c, term)
+		res, err := GetImages(term)
 		if err != nil {
 			return nil, errors.Wrap(err, "error getting images from DDG")
 		}

@@ -1,12 +1,15 @@
-package download
+package downloader
 
 import (
 	"bufio"
 	"fmt"
 	"io"
+	"math/rand"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,8 +21,6 @@ import (
 const (
 	nDownloaders = 100 // Image downloaders.
 	nWriters     = 100 // Download consumers / writers.
-
-	defaultTimeout = time.Second * 15
 )
 
 type downloadedImage struct {
@@ -27,18 +28,30 @@ type downloadedImage struct {
 	r    io.Reader
 }
 
-type Downloader struct{}
-
-func New() *Downloader {
-	return &Downloader{}
+type Downloader struct {
+	cfg *Config
 }
 
-func (d *Downloader) Download(images []*search.Result, outDir string) error {
+type Config struct {
+	OutDir  string
+	Verbose bool
+	Timeout time.Duration
+}
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+func New(cfg *Config) *Downloader {
+	return &Downloader{cfg: cfg}
+}
+
+func (d *Downloader) Download(images []*search.Result) error {
 	wrkChan := make(chan string)
 	errChan := make(chan error)
 	imgChan := make(chan *downloadedImage)
 
-	if err := createOutDir(outDir); err != nil {
+	if err := createOutDir(d.cfg.OutDir); err != nil {
 		return errors.Wrap(err, "error creating output directory")
 	}
 
@@ -47,7 +60,7 @@ func (d *Downloader) Download(images []*search.Result, outDir string) error {
 	for nw := 0; nw < nWriters; nw++ {
 		go func() {
 			for {
-				errChan <- save(<-imgChan, outDir)
+				errChan <- save(<-imgChan, d.cfg.OutDir)
 				wg.Done()
 			}
 		}()
@@ -56,7 +69,7 @@ func (d *Downloader) Download(images []*search.Result, outDir string) error {
 	for nd := 0; nd < nDownloaders; nd++ {
 		go func() {
 			for {
-				img, err := download(<-wrkChan)
+				img, err := d.download(<-wrkChan)
 				if err != nil {
 					wg.Done()
 					errChan <- err
@@ -80,6 +93,9 @@ func (d *Downloader) Download(images []*search.Result, outDir string) error {
 			case err := <-errChan:
 				if err != nil {
 					errors = append(errors, err)
+					if d.cfg.Verbose {
+						color.Red("\n:: Error: %v", err)
+					}
 				}
 			}
 		}
@@ -91,8 +107,8 @@ func (d *Downloader) Download(images []*search.Result, outDir string) error {
 	return nil
 }
 
-func download(u string) (*downloadedImage, error) {
-	c := &http.Client{Timeout: defaultTimeout}
+func (d *Downloader) download(u string) (*downloadedImage, error) {
+	c := &http.Client{Timeout: d.cfg.Timeout}
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
@@ -102,26 +118,27 @@ func download(u string) (*downloadedImage, error) {
 		return nil, err
 	}
 	body := resp.Body.(io.Reader)
-	if body, err = isImage(body); err != nil {
-		return nil, errors.Wrap(err, "error downloading image")
+	body, ct, err := isImage(body)
+	if err != nil {
+		return nil, errors.Wrap(err, "error reading file content type")
 	}
 	return &downloadedImage{
-		name: filepath.Base(u),
+		name: cleanFilename(u, ct),
 		r:    body,
 	}, nil
 }
 
-func isImage(r io.Reader) (io.Reader, error) {
+func isImage(r io.Reader) (io.Reader, string, error) {
 	br := bufio.NewReader(r)
 	buf, err := br.Peek(512)
 	if err != nil {
-		return nil, errors.Wrap(err, "error seeking 512 bytes to read image details")
+		return nil, "", errors.Wrap(err, "error seeking 512 bytes to read image details")
 	}
 	contentType := http.DetectContentType(buf)
 	if !strings.HasPrefix(contentType, "image/") {
-		return nil, fmt.Errorf("unexpected content type %s", contentType)
+		return nil, "", fmt.Errorf("unexpected content type %s", contentType)
 	}
-	return br, nil
+	return br, contentType, nil
 
 }
 
@@ -150,4 +167,31 @@ func createOutDir(dir string) error {
 		return nil
 	}
 	return os.Mkdir(dir, 0777)
+}
+
+func cleanFilename(u string, contentType string) string {
+	entropy := genEntropy()
+	base := filepath.Base(u)
+
+	ext := filepath.Ext(base)
+	if ext == "" {
+		exts, err := mime.ExtensionsByType(contentType)
+		if err == nil && (exts != nil && len(exts) > 1) {
+			return entropy + "-" + base + exts[0]
+		}
+
+		// No extension and we can't find an extension by the content type..
+		return entropy + "-" + base
+	}
+
+	ind := strings.Index(base, ext)
+	return entropy + "-" + base[0:ind+(len(ext))]
+}
+
+func genEntropy() string {
+	const (
+		low  = 1000
+		high = 99999
+	)
+	return strconv.Itoa(low + rand.Intn(high-low))
 }
