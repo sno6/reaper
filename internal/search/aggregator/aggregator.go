@@ -1,8 +1,6 @@
 package aggregator
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/sno6/reaper/internal/search"
 	"github.com/sno6/reaper/internal/search/duck"
@@ -62,7 +60,6 @@ func filterDimensions(res []*search.Result, mw, mh int) []*search.Result {
 	for _, v := range res {
 		if v.Width >= mw && v.Height >= mh {
 			newRes = append(newRes, v)
-			fmt.Printf("Passing image with dims: %d %d, confg: %dx%d\n", v.Width, v.Height, mw, mh)
 		}
 	}
 	return newRes

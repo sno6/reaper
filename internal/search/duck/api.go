@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/sno6/reaper/internal/search"
 )
@@ -34,9 +35,13 @@ const (
 	searchURL = baseURL + "/" + "i.js"
 	maxIter   = 20
 	step      = 50
+
+	defTimeout = time.Second * 10
 )
 
 func GetImages(searchTerm string) ([]*search.Result, error) {
+	fmt.Println("getImages with term:", searchTerm)
+
 	var results []*search.Result
 	searchTerm = url.QueryEscape(searchTerm)
 
@@ -97,7 +102,8 @@ func getToken(searchTerm string) (string, error) {
 	q.Add("q", searchTerm)
 	r.URL.RawQuery = q.Encode()
 
-	rsp, err := http.DefaultClient.Do(r)
+	c := &http.Client{Timeout: defTimeout}
+	rsp, err := c.Do(r)
 	if err != nil {
 		return "", nil
 	}

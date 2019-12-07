@@ -36,6 +36,7 @@ func (r *Reaper) Run() error {
 		return err
 	}
 
+	color.Green(":: Found %d images, downloading...", len(res))
 	dl := downloader.New(&downloader.Config{
 		OutDir:  r.cfg.OutDir,
 		Verbose: r.cfg.Verbose,

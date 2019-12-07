@@ -26,7 +26,7 @@ func RootCmd() *cobra.Command {
 		Short: "Generate a dataset for a given topic",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(searchTerms) == 0 {
-				fmt.Printf("Reaper needs a search term in order to work\n\n")
+				fmt.Print("Reaper needs a search term in order to work\n\n")
 				cmd.Usage()
 				os.Exit(1)
 			}

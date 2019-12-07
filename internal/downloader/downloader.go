@@ -102,7 +102,8 @@ func (d *Downloader) Download(images []*search.Result) error {
 	}()
 
 	wg.Wait()
-	color.Green("\n:: Successfully downloaded %d images, %d downloads failed (use -v flag for errors)", len(images)-len(errors), len(errors))
+	color.Green("\n:: Successfully downloaded %d images, %d downloads failed (use -v flag for errors)",
+		len(images)-len(errors), len(errors))
 
 	return nil
 }
